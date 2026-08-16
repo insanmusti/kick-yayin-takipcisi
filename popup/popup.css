@@ -1,0 +1,101 @@
+body {
+  width: 300px;
+  background-color: #0b0e0f;
+  color: #ffffff;
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 12px;
+}
+
+h2 {
+  font-size: 15px;
+  margin-top: 0;
+  margin-bottom: 10px;
+  color: #53fc18;
+  text-align: center;
+}
+
+.input-container {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+input {
+  flex: 1;
+  padding: 8px;
+  background-color: #191b1f;
+  border: 1px solid #24272c;
+  color: white;
+  border-radius: 4px;
+  outline: none;
+}
+
+input:focus {
+  border-color: #53fc18;
+}
+
+button {
+  background-color: #53fc18;
+  color: #000;
+  border: none;
+  padding: 8px 12px;
+  font-weight: bold;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #42ca13;
+}
+
+.list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+.streamer-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #191b1f;
+  padding: 8px 10px;
+  border-radius: 4px;
+}
+
+.streamer-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  text-decoration: none;
+  color: white;
+  flex: 1;
+  font-size: 13px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #555;
+}
+
+.status-dot.live {
+  background-color: #53fc18;
+  box-shadow: 0 0 6px #53fc18;
+}
+
+.remove-btn {
+  background: transparent;
+  color: #ff4d4d;
+  font-size: 12px;
+  padding: 2px 6px;
+}
+
+.remove-btn:hover {
+  background: rgba(255, 77, 77, 0.2);
+}
