@@ -1,0 +1,32 @@
+{
+  "manifest_version": 3,
+  "name": "Kick Yayın Bildirici",
+  "version": "1.1.0",
+  "description": "Seçtiğiniz Kick yayıncılarını anlık takip edin.",
+  "permissions": [
+    "storage",
+    "alarms"
+  ],
+  "host_permissions": [
+    "https://*.kick.com/*"
+  ],
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_title": "Kick Takipçisi",
+    "default_icon": "icon/icon.png"
+  },
+  "icons": {
+    "128": "icon/icon.png"
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "kick-notifier@insanmusti.com",
+      "data_collection_permissions": {
+        "required": ["none"]
+      }
+    }
+  }
+}
