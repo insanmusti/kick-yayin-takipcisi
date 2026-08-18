@@ -1,7 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
   loadChannels();
-  
-  // Pop-up açıldığında arka plandaki rozeti güncellemek için mesaj gönder
   chrome.runtime.sendMessage({ action: "updateBadge" });
 
   const addChannelBtn = document.getElementById("add-channel-btn");
@@ -24,7 +22,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
-// Kanalları paralel (eşzamanlı) ve hızlı şekilde yükleyen ana fonksiyon
 async function loadChannels() {
   const container = document.getElementById("channel-list");
   if (!container) return;
@@ -32,12 +29,17 @@ async function loadChannels() {
   const data = await chrome.storage.local.get(["channels"]);
   const channels = data.channels || [];
 
+  // innerHTML yerine textContent ile temizleme yapılıyor
+  container.textContent = "";
+
   if (channels.length === 0) {
-    container.innerHTML = `<div class="empty-msg">Henüz bir kanal eklemediniz.</div>`;
+    const emptyDiv = document.createElement("div");
+    emptyDiv.className = "empty-msg";
+    emptyDiv.textContent = "Henüz bir kanal eklemediniz.";
+    container.appendChild(emptyDiv);
     return;
   }
 
-  // İstekleri sırayla beklemek yerine Promise.all ile HIZLI (paralel) çekiyoruz
   const channelPromises = channels.map(async (channelName) => {
     try {
       const response = await fetch(`https://kick.com/api/v1/channels/${channelName}`, {
@@ -54,15 +56,12 @@ async function loadChannels() {
   });
 
   const results = await Promise.all(channelPromises);
-  
-  // Arayüzü temizle ve kartları çizdir
-  container.innerHTML = "";
+
   results.forEach((item) => {
     renderChannelCard(container, item);
   });
 }
 
-// Kanal ekleme işlemi
 async function addChannel(channelName) {
   const data = await chrome.storage.local.get(["channels"]);
   let channels = data.channels || [];
@@ -71,12 +70,10 @@ async function addChannel(channelName) {
     channels.push(channelName);
     await chrome.storage.local.set({ channels });
     loadChannels();
-    // Arka plana rozeti güncellemesi için haber ver
     chrome.runtime.sendMessage({ action: "updateBadge" });
   }
 }
 
-// Kanal silme işlemi
 async function removeChannel(channelName) {
   const data = await chrome.storage.local.get(["channels"]);
   let channels = data.channels || [];
@@ -84,47 +81,76 @@ async function removeChannel(channelName) {
   channels = channels.filter((name) => name !== channelName);
   await chrome.storage.local.set({ channels });
   loadChannels();
-  // Arka plana rozeti güncellemesi için haber ver
   chrome.runtime.sendMessage({ action: "updateBadge" });
 }
 
-// Kanal kartını ekrana basan fonksiyon
+// Kartlar innerHTML yerine güvenli createElement ve textContent ile oluşturuluyor
 function renderChannelCard(container, item) {
   const card = document.createElement("div");
   card.className = "channel-card";
 
   if (item.error || !item.data) {
-    card.innerHTML = `
-      <div class="channel-info">
-        <span class="channel-name">${item.name}</span>
-        <span class="status offline">Hata / Bulunamadı</span>
-      </div>
-      <button class="delete-btn" data-name="${item.name}">Sil</button>
-    `;
+    const infoDiv = document.createElement("div");
+    infoDiv.className = "channel-info";
+
+    const nameSpan = document.createElement("span");
+    nameSpan.className = "channel-name";
+    nameSpan.textContent = item.name;
+
+    const statusSpan = document.createElement("span");
+    statusSpan.className = "status offline";
+    statusSpan.textContent = "Hata / Bulunamadı";
+
+    infoDiv.appendChild(nameSpan);
+    infoDiv.appendChild(statusSpan);
+
+    const deleteBtn = document.createElement("button");
+    deleteBtn.className = "delete-btn";
+    deleteBtn.textContent = "Sil";
+    deleteBtn.addEventListener("click", () => removeChannel(item.name));
+
+    card.appendChild(infoDiv);
+    card.appendChild(deleteBtn);
   } else {
     const isLive = item.data.livestream !== null;
     const viewers = isLive ? item.data.livestream.viewer_count : 0;
-    const avatar = item.data.user?.profile_pic || "../icon/icon.png";
+    const avatarUrl = item.data.user?.profile_pic || "../icon/icon.png";
 
-    card.innerHTML = `
-      <div class="channel-left">
-        <img src="${avatar}" class="avatar" alt="${item.name}" />
-        <div class="channel-details">
-          <a href="https://kick.com/${item.name}" target="_blank" class="channel-name">${item.name}</a>
-          <span class="status ${isLive ? "live" : "offline"}">
-            ${isLive ? `🔴 Canlı (${viewers} izleyici)` : "Çevrimdışı"}
-          </span>
-        </div>
-      </div>
-      <button class="delete-btn" data-name="${item.name}">Sil</button>
-    `;
+    const leftDiv = document.createElement("div");
+    leftDiv.className = "channel-left";
+
+    const avatarImg = document.createElement("img");
+    avatarImg.className = "avatar";
+    avatarImg.src = avatarUrl;
+    avatarImg.alt = item.name;
+
+    const detailsDiv = document.createElement("div");
+    detailsDiv.className = "channel-details";
+
+    const channelLink = document.createElement("a");
+    channelLink.href = `https://kick.com/${item.name}`;
+    channelLink.target = "_blank";
+    channelLink.className = "channel-name";
+    channelLink.textContent = item.name;
+
+    const statusSpan = document.createElement("span");
+    statusSpan.className = `status ${isLive ? "live" : "offline"}`;
+    statusSpan.textContent = isLive ? `🔴 Canlı (${viewers} izleyici)` : "Çevrimdışı";
+
+    detailsDiv.appendChild(channelLink);
+    detailsDiv.appendChild(statusSpan);
+
+    leftDiv.appendChild(avatarImg);
+    leftDiv.appendChild(detailsDiv);
+
+    const deleteBtn = document.createElement("button");
+    deleteBtn.className = "delete-btn";
+    deleteBtn.textContent = "Sil";
+    deleteBtn.addEventListener("click", () => removeChannel(item.name));
+
+    card.appendChild(leftDiv);
+    card.appendChild(deleteBtn);
   }
-
-  // Silme butonuna tıklama olayı
-  const deleteBtn = card.querySelector(".delete-btn");
-  deleteBtn.addEventListener("click", () => {
-    removeChannel(item.name);
-  });
 
   container.appendChild(card);
 }
