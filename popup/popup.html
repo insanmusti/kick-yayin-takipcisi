@@ -1,31 +1,26 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kick Takipçisi</title>
-  <link rel="stylesheet" href="popup.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kick Yayın Bildirici</title>
+  <link rel="stylesheet" href="popup.css" />
 </head>
 <body>
-  <div class="app-container">
-    <header class="app-header">
-      <div class="brand">
-        <span class="pulse-dot"></span>
-        <h1 class="brand-title">Kick Notifier</h1>
-      </div>
-      <div id="liveCounter" class="live-counter">0 Yayın Açık</div>
-    </header>
-
-    <div class="control-panel">
-      <div class="input-wrapper">
-        <input type="text" id="streamerInput" placeholder="Kullanıcı adı girin..." autocomplete="off" spellcheck="false" />
-      </div>
-      <button id="addBtn" class="primary-btn">Ekle</button>
+  <div class="container">
+    <h2>Kick Yayın Takipçisi</h2>
+    
+    <div class="input-group">
+      <input 
+        type="text" 
+        id="channel-input" 
+        placeholder="Kanal adı girin..." 
+        autocomplete="off"
+      />
+      <button id="add-channel-btn">Ekle</button>
     </div>
 
-    <main class="content-area">
-      <ul id="streamerList" class="streamer-list"></ul>
-    </main>
+    <div id="channel-list"></div>
   </div>
 
   <script src="popup.js"></script>

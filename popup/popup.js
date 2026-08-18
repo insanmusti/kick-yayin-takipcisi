@@ -6,17 +6,21 @@ document.addEventListener("DOMContentLoaded", () => {
   const channelInput = document.getElementById("channel-input");
 
   if (addChannelBtn && channelInput) {
-    addChannelBtn.addEventListener("click", () => {
+    addChannelBtn.addEventListener("click", async () => {
       const channelName = channelInput.value.trim().toLowerCase();
       if (channelName) {
-        addChannel(channelName);
+        await addChannel(channelName);
         channelInput.value = "";
       }
     });
 
-    channelInput.addEventListener("keypress", (e) => {
+    channelInput.addEventListener("keypress", async (e) => {
       if (e.key === "Enter") {
-        addChannelBtn.click();
+        const channelName = channelInput.value.trim().toLowerCase();
+        if (channelName) {
+          await addChannel(channelName);
+          channelInput.value = "";
+        }
       }
     });
   }
@@ -29,7 +33,6 @@ async function loadChannels() {
   const data = await chrome.storage.local.get(["channels"]);
   const channels = data.channels || [];
 
-  // innerHTML yerine textContent ile temizleme yapılıyor
   container.textContent = "";
 
   if (channels.length === 0) {
@@ -57,6 +60,7 @@ async function loadChannels() {
 
   const results = await Promise.all(channelPromises);
 
+  container.textContent = "";
   results.forEach((item) => {
     renderChannelCard(container, item);
   });
@@ -68,8 +72,10 @@ async function addChannel(channelName) {
 
   if (!channels.includes(channelName)) {
     channels.push(channelName);
-    await chrome.storage.local.set({ channels });
-    loadChannels();
+    // Verinin tamamen kaydedilmesini kesin olarak bekliyoruz
+    await chrome.storage.local.set({ channels: channels });
+    // Kayıt tamamlandıktan sonra güncel listeyi yüklüyoruz
+    await loadChannels();
     chrome.runtime.sendMessage({ action: "updateBadge" });
   }
 }
@@ -79,12 +85,11 @@ async function removeChannel(channelName) {
   let channels = data.channels || [];
 
   channels = channels.filter((name) => name !== channelName);
-  await chrome.storage.local.set({ channels });
-  loadChannels();
+  await chrome.storage.local.set({ channels: channels });
+  await loadChannels();
   chrome.runtime.sendMessage({ action: "updateBadge" });
 }
 
-// Kartlar innerHTML yerine güvenli createElement ve textContent ile oluşturuluyor
 function renderChannelCard(container, item) {
   const card = document.createElement("div");
   card.className = "channel-card";
@@ -99,7 +104,7 @@ function renderChannelCard(container, item) {
 
     const statusSpan = document.createElement("span");
     statusSpan.className = "status offline";
-    statusSpan.textContent = "Hata / Bulunamadı";
+    statusSpan.textContent = "Çevrimdışı / Yüklenemedi";
 
     infoDiv.appendChild(nameSpan);
     infoDiv.appendChild(statusSpan);
