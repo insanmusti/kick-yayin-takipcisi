@@ -1,13 +1,33 @@
-# Kick Canlı Yayın Takipçisi (Firefox)
+# Kick Yayın Bildirici (Firefox)
 
-Firefox ve Firefox forkları (LibreWolf, Waterfox, Floorp, Zen vb.) için geliştirilmiş özel Kick yayın takip eklentisi.
+Kick platformundaki favori yayıncılarınızın canlı yayın durumlarını anlık olarak takip etmenizi sağlayan Firefox tarayıcı eklentisi.
 
 ## Özellikler
-- 🟢 Takip ettiğiniz yayıncılar canlı yayına geçtiğinde eklenti simgesinde canlı sayısı yazar.
-- 🎯 Yalnızca sizin eklediğiniz yayıncıları takip eder.
-- 🔒 **Güvenli:** Veri toplamaz, tamamen açık kaynaklıdır ve doğrudan Kick API'sini kullanır.
 
-## Kurulum
-1. Projeyi ZIP olarak indirin ve bir klasöre çıkarın.
-2. Firefox adres çubuğuna `about:debugging#/runtime/this-firefox` yazın.
-3. **"Geçici Eklenti Yükle..."** butonuna basarak klasör içindeki `manifest.json` dosyasını seçin.
+* **Anlık Bildirim Rozeti:** Pop-up'ı açmanıza gerek kalmadan simge üzerinde kaç yayıncının canlıda olduğunu gösterir.
+* **Hızlı ve Paralel Yükleme:** İstekleri eşzamanlı atarak yayın durumlarını saniyeler içinde günceller.
+* **Düşük Kaynak Kullanımı:** Arka planda yalnızca periyodik alarmlarla çalışır, tarayıcınızı yavaşlatmaz.
+* **Gizlilik Odaklı:** Kişisel verilerinizi toplamaz ve üçüncü taraf sunuculara aktarmaz.
+
+---
+
+## Kurulum (.xpi Dosyası İle)
+
+Eklentiyi bilgisayarınıza indirip manuel olarak yüklemek için aşağıdaki adımları izleyin:
+
+1. Bu depodaki veya **Releases** bölümündeki güncel **`.xpi`** dosyasını bilgisayarınıza indirin.
+2. Firefox tarayıcınızı açın.
+3. Adres çubuğuna `about:addons` yazıp **Enter** tuşuna basın (veya `Ctrl + Shift + A` kısayolunu kullanın).
+4. Sağ üst köşedeki **Çark (Ayarlar)** simgesine tıklayın.
+5. Açılan menüden **"Dosyadan eklenti yükle..."** (*Install Add-on From File...*) seçeneğine tıklayın.
+6. İndirdiğiniz `.xpi` dosyasını seçin ve beliren onay penceresinde **"Ekle"** butonuna basın.
+
+---
+
+## Geliştirici Kurulumu (Kaynak Koddan)
+
+Eklenti kodlarını düzenlemek veya yerel olarak test etmek isterseniz:
+
+1. Depoyu klonlayın:
+   ```bash
+   git clone [https://github.com/insanmusti/kick-yayin-takipcisi.git](https://github.com/insanmusti/kick-yayin-takipcisi.git)
