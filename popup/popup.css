@@ -1,213 +1,154 @@
-:root {
-  --fx-bg: #0d0e12;
-  --fx-card-bg: rgba(22, 25, 35, 0.85);
-  --fx-input-bg: #181b24;
-  --kick-green: #53fc18;
-  --kick-green-glow: rgba(83, 252, 24, 0.35);
-  --text-primary: #f4f5f7;
-  --text-secondary: #8c93a4;
-  --danger-color: #ff3b30;
-  --border-light: rgba(255, 255, 255, 0.08);
-  --border-active: rgba(83, 252, 24, 0.5);
-}
-
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Firefox Sans, Roboto, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 body {
-  width: 350px;
-  background-color: var(--fx-bg);
-  color: var(--text-primary);
-  padding: 16px;
+  width: 320px;
+  background-color: #0e0e10;
+  color: #efeff1;
+  padding: 12px;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+h2 {
+  font-size: 15px;
+  font-weight: 700;
+  color: #53fc18;
+  text-align: center;
+}
+
+.input-group {
+  display: flex;
+  gap: 6px;
+}
+
+#channel-input {
+  flex: 1;
+  background-color: #1f1f23;
+  border: 1px solid #3a3a3d;
+  border-radius: 4px;
+  padding: 6px 10px;
+  color: #efeff1;
+  font-size: 13px;
+  outline: none;
+}
+
+#channel-input:focus {
+  border-color: #53fc18;
+}
+
+#add-channel-btn {
+  background-color: #53fc18;
+  color: #000000;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-weight: 600;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+#add-channel-btn:hover {
+  background-color: #42ca13;
+}
+
+#channel-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 360px;
+  overflow-y: auto;
+}
+
+.empty-msg {
+  text-align: center;
+  color: #adadb8;
+  font-size: 12px;
+  padding: 10px 0;
+}
+
+/* Kart Yapısı */
+.channel-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #18181b;
+  border: 1px solid #26262c;
+  border-radius: 6px;
+  padding: 8px 10px;
+}
+
+.channel-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   overflow: hidden;
 }
 
-.app-container {
-  background: var(--fx-card-bg);
-  border: 1px solid var(--border-light);
-  border-radius: 14px;
-  padding: 16px;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
-}
-
-.app-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--border-light);
-}
-
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.pulse-dot {
-  width: 10px;
-  height: 10px;
-  background-color: var(--kick-green);
+/* Küçük Avatar */
+.avatar {
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  box-shadow: 0 0 10px var(--kick-green);
-  animation: pulse 2s infinite;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid #3a3a3d;
 }
 
-@keyframes pulse {
-  0% { transform: scale(0.95); box-shadow: 0 0 0 0 var(--kick-green-glow); }
-  70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(83, 252, 24, 0); }
-  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(83, 252, 24, 0); }
-}
-
-.brand-title {
-  font-size: 16px;
-  font-weight: 700;
-  letter-spacing: -0.4px;
-}
-
-.live-counter {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--kick-green);
-  background: rgba(83, 252, 24, 0.1);
-  border: 1px solid rgba(83, 252, 24, 0.25);
-  padding: 4px 10px;
-  border-radius: 20px;
-}
-
-.control-panel {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 14px;
-}
-
-.input-wrapper {
-  flex: 1;
-}
-
-input[type="text"] {
-  width: 100%;
-  background-color: var(--fx-input-bg);
-  border: 1px solid var(--border-light);
-  border-radius: 10px;
-  padding: 10px 14px;
-  color: var(--text-primary);
-  font-size: 13px;
-  outline: none;
-  transition: all 0.2s ease;
-}
-
-input[type="text"]:focus {
-  border-color: var(--kick-green);
-  box-shadow: 0 0 12px var(--kick-green-glow);
-}
-
-.primary-btn {
-  background-color: var(--kick-green);
-  color: #000;
-  border: none;
-  border-radius: 10px;
-  padding: 0 18px;
-  font-weight: 700;
-  font-size: 13px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.primary-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px var(--kick-green-glow);
-}
-
-.content-area {
-  max-height: 230px;
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: var(--border-light) transparent;
-}
-
-.streamer-list {
-  list-style: none;
+.channel-details {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-}
-
-.streamer-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: var(--fx-input-bg);
-  border: 1px solid var(--border-light);
-  border-radius: 10px;
-  padding: 10px 12px;
-  transition: all 0.2s ease;
-}
-
-.streamer-item:hover {
-  border-color: var(--border-active);
-  transform: translateX(2px);
-}
-
-.streamer-item.empty {
   justify-content: center;
-  background: transparent;
-  border: 1px dashed var(--border-light);
-  color: var(--text-secondary);
-  font-size: 12px;
-  padding: 20px;
+  overflow: hidden;
 }
 
-.streamer-details {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  flex: 1;
-}
-
-.streamer-name {
-  font-size: 13px;
+.channel-name {
+  color: #efeff1;
   font-weight: 600;
-  transition: color 0.2s ease;
+  font-size: 13px;
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.streamer-details:hover .streamer-name {
-  color: var(--kick-green);
+.channel-name:hover {
+  color: #53fc18;
 }
 
-.status-tag {
-  font-size: 10px;
-  padding: 2px 8px;
-  border-radius: 6px;
-  background-color: rgba(255, 255, 255, 0.05);
-  color: var(--text-secondary);
+.status {
+  font-size: 11px;
 }
 
-.status-tag.online {
-  background-color: rgba(83, 252, 24, 0.15);
-  color: var(--kick-green);
-  font-weight: 700;
+.status.live {
+  color: #53fc18;
+  font-weight: 600;
+}
+
+.status.offline {
+  color: #adadb8;
 }
 
 .delete-btn {
-  background: transparent;
-  border: 1px solid rgba(255, 59, 48, 0.2);
-  color: var(--danger-color);
-  border-radius: 6px;
-  padding: 4px 8px;
+  background-color: transparent;
+  color: #eb0400;
+  border: 1px solid #eb040044;
+  border-radius: 4px;
+  padding: 3px 8px;
   font-size: 11px;
-  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  flex-shrink: 0;
 }
 
 .delete-btn:hover {
-  background-color: var(--danger-color);
-  color: #fff;
+  background-color: #eb0400;
+  color: #ffffff;
 }
