@@ -31,3 +31,9 @@ Eklenti kodlarını düzenlemek veya yerel olarak test etmek isterseniz:
 1. Depoyu klonlayın:
    ```bash
    git clone [https://github.com/insanmusti/kick-yayin-takipcisi.git](https://github.com/insanmusti/kick-yayin-takipcisi.git)
+
+---
+
+## Chrome
+Biraz kötü ama idare eder...
+https://github.com/insanmusti/kick-yayin-takipcisi-chrome/ 
