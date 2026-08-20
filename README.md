@@ -34,6 +34,5 @@ Eklenti kodlarını düzenlemek veya yerel olarak test etmek isterseniz:
 
 ---
 
-## Chrome
-Biraz kötü ama idare eder...
-https://github.com/insanmusti/kick-yayin-takipcisi-chrome/ 
+## Chromium
+https://github.com/insanmusti/kick-takipci-chromium
