@@ -1,4 +1,7 @@
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+  await restoreTheme();
+  setupTabs();
+  setupThemeGrid();
   loadChannels();
   chrome.runtime.sendMessage({ action: "updateBadge" });
 
@@ -25,6 +28,65 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 });
+
+function setupTabs() {
+  const tabs = document.querySelectorAll(".tab-btn");
+  tabs.forEach((tab) => {
+    tab.addEventListener("click", () => {
+      tabs.forEach((t) => t.classList.toggle("active", t === tab));
+      document.querySelectorAll(".panel").forEach((panel) => {
+        panel.classList.toggle("active", panel.id === tab.dataset.panel);
+      });
+    });
+  });
+}
+
+async function setupThemeGrid() {
+  const grid = document.getElementById("theme-grid");
+  if (!grid) return;
+
+  const currentTheme = await getSavedTheme();
+
+  Object.entries(THEMES).forEach(([id, theme]) => {
+    const option = document.createElement("button");
+    option.type = "button";
+    option.className = "theme-option" + (id === currentTheme ? " selected" : "");
+
+    const swatch = document.createElement("span");
+    swatch.className = "theme-swatch";
+    theme.swatch.forEach((color) => {
+      const dot = document.createElement("span");
+      dot.style.backgroundColor = color;
+      swatch.appendChild(dot);
+    });
+
+    const nameSpan = document.createElement("span");
+    nameSpan.className = "theme-name";
+    nameSpan.textContent = theme.label;
+
+    const check = document.createElement("span");
+    check.className = "theme-check";
+    check.textContent = id === currentTheme ? "\u2713" : "";
+
+    option.appendChild(swatch);
+    option.appendChild(nameSpan);
+    option.appendChild(check);
+
+    option.addEventListener("click", async () => {
+      applyTheme(id);
+      await saveTheme(id);
+      grid.querySelectorAll(".theme-option").forEach((el) => {
+        el.classList.remove("selected");
+        const c = el.querySelector(".theme-check");
+        if (c) c.textContent = "";
+      });
+      option.classList.add("selected");
+      check.textContent = "\u2713";
+    });
+
+    grid.appendChild(option);
+  });
+}
 
 async function loadChannels() {
   const container = document.getElementById("channel-list");
