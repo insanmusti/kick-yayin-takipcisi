@@ -103,6 +103,7 @@ async function loadChannels() {
     emptyDiv.className = "empty-msg";
     emptyDiv.textContent = "Henüz bir kanal eklemediniz.";
     container.appendChild(emptyDiv);
+    renderSuggestions();
     return;
   }
 
