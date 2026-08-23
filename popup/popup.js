@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   await restoreTheme();
   setupTabs();
   setupThemeGrid();
+  setupSuggestionsToggle();
   loadChannels();
   chrome.runtime.sendMessage({ action: "updateBadge" });
 
@@ -126,6 +127,135 @@ async function loadChannels() {
   results.forEach((item) => {
     renderChannelCard(container, item);
   });
+
+  renderSuggestions();
+}
+
+async function setupSuggestionsToggle() {
+  const toggle = document.getElementById("toggle-suggestions");
+  if (!toggle) return;
+
+  const prefs = await getSuggestionPrefs();
+  toggle.checked = prefs.showSuggestions;
+
+  toggle.addEventListener("change", async () => {
+    await setShowSuggestions(toggle.checked);
+    renderSuggestions();
+  });
+}
+
+async function renderSuggestions() {
+  const section = document.getElementById("suggested-section");
+  const container = document.getElementById("suggested-list");
+  if (!section || !container) return;
+
+  const prefs = await getSuggestionPrefs();
+  const data = await chrome.storage.local.get(["channels"]);
+  const channels = data.channels || [];
+
+  const visible = prefs.showSuggestions
+    ? SUGGESTED_CHANNELS.filter(
+        (name) => !channels.includes(name) && !prefs.dismissedSuggestions.includes(name)
+      )
+    : [];
+
+  if (visible.length === 0) {
+    section.classList.add("hidden");
+    container.textContent = "";
+    return;
+  }
+
+  section.classList.remove("hidden");
+
+  const requests = visible.map(async (name) => {
+    try {
+      const response = await fetch(`https://kick.com/api/v1/channels/${name}`, {
+        cache: "no-store"
+      });
+      if (response.ok) {
+        const result = await response.json();
+        return { name: name, data: result };
+      }
+    } catch (e) {
+      console.error(`${name} önerisi alınamadı:`, e);
+    }
+    return { name: name, data: null };
+  });
+
+  const results = await Promise.all(requests);
+
+  container.textContent = "";
+  results.forEach((item) => {
+    renderSuggestionCard(container, item);
+  });
+}
+
+function renderSuggestionCard(container, item) {
+  const isLive = item.data && item.data.livestream !== null;
+  const viewers = isLive ? item.data.livestream.viewer_count : 0;
+  const avatarUrl = item.data?.user?.profile_pic || "../icon/icon.png";
+
+  const card = document.createElement("div");
+  card.className = "channel-card";
+
+  const leftDiv = document.createElement("div");
+  leftDiv.className = "channel-left";
+
+  const avatarImg = document.createElement("img");
+  avatarImg.className = "avatar";
+  avatarImg.src = avatarUrl;
+  avatarImg.alt = item.name;
+
+  const detailsDiv = document.createElement("div");
+  detailsDiv.className = "channel-details";
+
+  const channelLink = document.createElement("a");
+  channelLink.href = `https://kick.com/${item.name}`;
+  channelLink.target = "_blank";
+  channelLink.className = "channel-name";
+  channelLink.title = `kick.com/${item.name}`;
+  channelLink.textContent = item.name;
+
+  const statusSpan = document.createElement("span");
+  statusSpan.className = `status ${isLive ? "live" : "offline"}`;
+  statusSpan.textContent = item.data
+    ? isLive
+      ? `🔴 Canlı (${viewers} izleyici)`
+      : "Çevrimdışı"
+    : "Yüklenemedi";
+
+  detailsDiv.appendChild(channelLink);
+  detailsDiv.appendChild(statusSpan);
+  leftDiv.appendChild(avatarImg);
+  leftDiv.appendChild(detailsDiv);
+
+  const actionsDiv = document.createElement("div");
+  actionsDiv.className = "suggest-actions";
+
+  const addBtn = document.createElement("button");
+  addBtn.className = "suggest-add-btn";
+  addBtn.textContent = "+ Ekle";
+  addBtn.addEventListener("click", async () => {
+    addBtn.disabled = true;
+    await addChannel(item.name);
+    renderSuggestions();
+  });
+
+  const dismissBtn = document.createElement("button");
+  dismissBtn.className = "suggest-dismiss";
+  dismissBtn.textContent = "\u00d7";
+  dismissBtn.title = "Bu öneriyi kapat";
+  dismissBtn.addEventListener("click", async () => {
+    await dismissSuggestion(item.name);
+    renderSuggestions();
+  });
+
+  actionsDiv.appendChild(addBtn);
+  actionsDiv.appendChild(dismissBtn);
+
+  card.appendChild(leftDiv);
+  card.appendChild(actionsDiv);
+  container.appendChild(card);
 }
 
 async function addChannel(channelName) {

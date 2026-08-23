@@ -33,9 +33,23 @@
       </div>
 
       <div id="channel-list"></div>
+
+      <div id="suggested-section" class="hidden">
+        <div class="settings-section-title">Önerilen Kanallar</div>
+        <div id="suggested-list"></div>
+      </div>
     </div>
 
     <div class="panel" id="panel-settings">
+      <div class="settings-section-title">Genel</div>
+      <div class="setting-row">
+        <span class="setting-label">Önerilen kanalları göster</span>
+        <label class="switch">
+          <input type="checkbox" id="toggle-suggestions" />
+          <span class="slider"></span>
+        </label>
+      </div>
+
       <div class="settings-section-title">Tema</div>
       <div class="theme-grid" id="theme-grid"></div>
       <div class="settings-hint">Seçtiğin tema otomatik olarak kaydedilir.</div>
@@ -43,6 +57,7 @@
   </div>
 
   <script src="themes.js"></script>
+  <script src="suggestions.js"></script>
   <script src="popup.js"></script>
 </body>
 </html>
