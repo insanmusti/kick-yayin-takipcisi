@@ -1,11 +1,12 @@
 {
   "manifest_version": 3,
   "name": "Kick Yayın Bildirici",
-  "version": "1.3.2",
+  "version": "1.4.1",
   "description": "Seçtiğiniz Kick yayıncılarını anlık takip edin.",
   "permissions": [
     "storage",
-    "alarms"
+    "alarms",
+    "notifications"
   ],
   "host_permissions": [
     "https://*.kick.com/*"

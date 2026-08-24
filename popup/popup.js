@@ -3,6 +3,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   setupTabs();
   setupThemeGrid();
   setupSuggestionsToggle();
+  setupNotificationsToggle();
+  setupNotificationTest();
   loadChannels();
   chrome.runtime.sendMessage({ action: "updateBadge" });
 
@@ -86,6 +88,39 @@ async function setupThemeGrid() {
     });
 
     grid.appendChild(option);
+  });
+}
+
+async function setupNotificationsToggle() {
+  const toggle = document.getElementById("toggle-notifications");
+  if (!toggle) return;
+
+  const data = await chrome.storage.local.get(["notificationsEnabled"]);
+  toggle.checked = data.notificationsEnabled !== false;
+
+  toggle.addEventListener("change", async () => {
+    await chrome.storage.local.set({ notificationsEnabled: toggle.checked });
+  });
+}
+
+function setupNotificationTest() {
+  const btn = document.getElementById("test-notification-btn");
+  if (!btn) return;
+
+  btn.addEventListener("click", async () => {
+    if (btn.disabled) return;
+    btn.disabled = true;
+    const originalText = btn.textContent;
+    btn.textContent = "Gönderiliyor...";
+    try {
+      await chrome.runtime.sendMessage({ action: "testNotification" });
+    } catch (e) {
+      console.error("Test bildirimi istenemedi:", e);
+    }
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.textContent = originalText;
+    }, 800);
   });
 }
 

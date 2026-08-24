@@ -356,6 +356,26 @@ h2 {
   transform: translateX(16px);
 }
 
+.test-btn {
+  background-color: transparent;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  padding: 7px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.test-btn:hover {
+  background-color: var(--tab-active-bg);
+}
+
+.test-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
 .settings-section-title {
   font-size: 11px;
   font-weight: 700;
