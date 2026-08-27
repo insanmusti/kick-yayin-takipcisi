@@ -19,7 +19,7 @@
   },
   "action": {
     "default_popup": "popup/popup.html",
-    "default_title": "Kick Takipçisi",
+    "default_title": "Kick Yayın Bildirici",
     "default_icon": "icon/icon.png"
   },
   "icons": {

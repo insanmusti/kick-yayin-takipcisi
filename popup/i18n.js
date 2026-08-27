@@ -1,6 +1,6 @@
 const I18N = {
   tr: {
-    title: "Kick Yayın Takipçisi",
+    title: "Kick Yayın Bildirici",
     tab_channels: "Kanallar",
     tab_settings: "Ayarlar",
     channel_placeholder: "Kanal adı girin...",
@@ -37,7 +37,7 @@ const I18N = {
     theme_ice: "Buz (Açık)"
   },
   en: {
-    title: "Kick Stream Tracker",
+    title: "Kick Stream Notifier",
     tab_channels: "Channels",
     tab_settings: "Settings",
     channel_placeholder: "Enter channel name...",
@@ -74,7 +74,7 @@ const I18N = {
     theme_ice: "Ice (Light)"
   },
   de: {
-    title: "Kick Stream-Tracker",
+    title: "Kick Stream-Notifier",
     tab_channels: "Kanäle",
     tab_settings: "Einstellungen",
     channel_placeholder: "Kanalnamen eingeben...",
