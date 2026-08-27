@@ -28,6 +28,8 @@ body {
   background-color: var(--bg);
   color: var(--text);
   padding: 12px;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .container {
@@ -68,6 +70,13 @@ h2 {
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.15s ease, color 0.15s ease;
+  min-width: 0;
+}
+
+.tab-btn span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .tab-btn:hover {
@@ -311,6 +320,11 @@ h2 {
   font-size: 12px;
   font-weight: 600;
   color: var(--text);
+  min-width: 0;
+}
+
+.setting-row .switch {
+  flex-shrink: 0;
 }
 
 .switch {
@@ -365,6 +379,7 @@ h2 {
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
+  width: 100%;
 }
 
 .test-btn:hover {
@@ -382,6 +397,8 @@ h2 {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--muted);
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .lang-grid {
@@ -463,6 +480,7 @@ h2 {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  min-width: 0;
 }
 
 .theme-option.selected .theme-name {
