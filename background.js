@@ -15,14 +15,6 @@ const I18N = {
     test_channel_title: "test notification for",
     now_live: "is live on Kick right now!",
     live_title: "went live!"
-  },
-  de: {
-    test_title: "Testbenachrichtigung",
-    test_message: "Benachrichtigungen funktionieren. Sie erhalten eine solche Benachrichtigung, wenn ein verfolgter Streamer live geht.",
-    test_live_title: "ist jetzt live!",
-    test_channel_title: "Testbenachrichtigung für",
-    now_live: "ist gerade live auf Kick!",
-    live_title: "ist jetzt live!"
   }
 };
 
