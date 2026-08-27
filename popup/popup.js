@@ -1,6 +1,10 @@
 document.addEventListener("DOMContentLoaded", async () => {
+  await restoreLang();
   await restoreTheme();
+
+  const currentLang = await getSavedLang();
   setupTabs();
+  setupLangButtons(currentLang);
   setupThemeGrid();
   setupSuggestionsToggle();
   setupNotificationsToggle();
@@ -44,11 +48,29 @@ function setupTabs() {
   });
 }
 
+function setupLangButtons(currentLang) {
+  const buttons = document.querySelectorAll(".lang-btn");
+  buttons.forEach((button) => {
+    button.classList.toggle("selected", button.dataset.lang === currentLang);
+    button.addEventListener("click", async () => {
+      const lang = button.dataset.lang;
+      await saveLang(lang);
+      applyLang(lang);
+      buttons.forEach((b) => b.classList.toggle("selected", b.dataset.lang === lang));
+      await restoreTheme();
+      setupThemeGrid();
+      loadChannels();
+    });
+  });
+}
+
 async function setupThemeGrid() {
   const grid = document.getElementById("theme-grid");
   if (!grid) return;
 
   const currentTheme = await getSavedTheme();
+  const lang = await getSavedLang();
+  grid.textContent = "";
 
   Object.entries(THEMES).forEach(([id, theme]) => {
     const option = document.createElement("button");
@@ -65,7 +87,7 @@ async function setupThemeGrid() {
 
     const nameSpan = document.createElement("span");
     nameSpan.className = "theme-name";
-    nameSpan.textContent = theme.label;
+    nameSpan.textContent = t(theme.label, lang);
 
     const check = document.createElement("span");
     check.className = "theme-check";
@@ -110,13 +132,15 @@ function setupNotificationTest() {
   btn.addEventListener("click", async () => {
     if (btn.disabled) return;
     btn.disabled = true;
-    const originalText = btn.textContent;
-    btn.textContent = "Gönderiliyor...";
+    const lang = await getSavedLang();
+    const sendingText = t("sending", lang);
+    btn.textContent = sendingText;
     try {
       await chrome.runtime.sendMessage({ action: "testNotification" });
     } catch (e) {
       console.error("Test bildirimi istenemedi:", e);
     }
+    const originalText = t("test_notification", lang);
     setTimeout(() => {
       btn.disabled = false;
       btn.textContent = originalText;
@@ -130,13 +154,14 @@ async function loadChannels() {
 
   const data = await chrome.storage.local.get(["channels"]);
   const channels = data.channels || [];
+  const lang = await getSavedLang();
 
   container.textContent = "";
 
   if (channels.length === 0) {
     const emptyDiv = document.createElement("div");
     emptyDiv.className = "empty-msg";
-    emptyDiv.textContent = "Henüz bir kanal eklemediniz.";
+    emptyDiv.textContent = t("empty", lang);
     container.appendChild(emptyDiv);
     renderSuggestions();
     return;
@@ -254,11 +279,14 @@ function renderSuggestionCard(container, item) {
 
   const statusSpan = document.createElement("span");
   statusSpan.className = `status ${isLive ? "live" : "offline"}`;
-  statusSpan.textContent = item.data
-    ? isLive
-      ? `🔴 Canlı (${viewers} izleyici)`
-      : "Çevrimdışı"
-    : "Yüklenemedi";
+
+  getSavedLang().then((lang) => {
+    statusSpan.textContent = item.data
+      ? isLive
+        ? t("live_with_viewers", lang).replace("{viewers}", viewers)
+        : t("offline", lang)
+      : t("error", lang);
+  });
 
   detailsDiv.appendChild(channelLink);
   detailsDiv.appendChild(statusSpan);
@@ -270,7 +298,9 @@ function renderSuggestionCard(container, item) {
 
   const addBtn = document.createElement("button");
   addBtn.className = "suggest-add-btn";
-  addBtn.textContent = "+ Ekle";
+  getSavedLang().then((lang) => {
+    addBtn.textContent = t("add_suggest", lang);
+  });
   addBtn.addEventListener("click", async () => {
     addBtn.disabled = true;
     await addChannel(item.name);
@@ -280,7 +310,9 @@ function renderSuggestionCard(container, item) {
   const dismissBtn = document.createElement("button");
   dismissBtn.className = "suggest-dismiss";
   dismissBtn.textContent = "\u00d7";
-  dismissBtn.title = "Bu öneriyi kapat";
+  getSavedLang().then((lang) => {
+    dismissBtn.title = t("dismiss_suggest", lang);
+  });
   dismissBtn.addEventListener("click", async () => {
     await dismissSuggestion(item.name);
     renderSuggestions();
@@ -300,9 +332,7 @@ async function addChannel(channelName) {
 
   if (!channels.includes(channelName)) {
     channels.push(channelName);
-    // Verinin tamamen kaydedilmesini kesin olarak bekliyoruz
     await chrome.storage.local.set({ channels: channels });
-    // Kayıt tamamlandıktan sonra güncel listeyi yüklüyoruz
     await loadChannels();
     chrome.runtime.sendMessage({ action: "updateBadge" });
   }
@@ -322,6 +352,13 @@ function renderChannelCard(container, item) {
   const card = document.createElement("div");
   card.className = "channel-card";
 
+  const deleteBtn = document.createElement("button");
+  deleteBtn.className = "delete-btn";
+  getSavedLang().then((lang) => {
+    deleteBtn.textContent = t("delete", lang);
+  });
+  deleteBtn.addEventListener("click", () => removeChannel(item.name));
+
   if (item.error || !item.data) {
     const infoDiv = document.createElement("div");
     infoDiv.className = "channel-info";
@@ -332,15 +369,12 @@ function renderChannelCard(container, item) {
 
     const statusSpan = document.createElement("span");
     statusSpan.className = "status offline";
-    statusSpan.textContent = "Çevrimdışı / Yüklenemedi";
+    getSavedLang().then((lang) => {
+      statusSpan.textContent = t("error_offline", lang);
+    });
 
     infoDiv.appendChild(nameSpan);
     infoDiv.appendChild(statusSpan);
-
-    const deleteBtn = document.createElement("button");
-    deleteBtn.className = "delete-btn";
-    deleteBtn.textContent = "Sil";
-    deleteBtn.addEventListener("click", () => removeChannel(item.name));
 
     card.appendChild(infoDiv);
     card.appendChild(deleteBtn);
@@ -368,18 +402,15 @@ function renderChannelCard(container, item) {
 
     const statusSpan = document.createElement("span");
     statusSpan.className = `status ${isLive ? "live" : "offline"}`;
-    statusSpan.textContent = isLive ? `🔴 Canlı (${viewers} izleyici)` : "Çevrimdışı";
+    getSavedLang().then((lang) => {
+      statusSpan.textContent = isLive ? t("live_with_viewers", lang).replace("{viewers}", viewers) : t("offline", lang);
+    });
 
     detailsDiv.appendChild(channelLink);
     detailsDiv.appendChild(statusSpan);
 
     leftDiv.appendChild(avatarImg);
     leftDiv.appendChild(detailsDiv);
-
-    const deleteBtn = document.createElement("button");
-    deleteBtn.className = "delete-btn";
-    deleteBtn.textContent = "Sil";
-    deleteBtn.addEventListener("click", () => removeChannel(item.name));
 
     card.appendChild(leftDiv);
     card.appendChild(deleteBtn);

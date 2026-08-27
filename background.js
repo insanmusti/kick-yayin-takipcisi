@@ -1,4 +1,31 @@
 // Eklenti yüklendiğinde veya tarayıcı başladığında alarmları kur ve ilk kontrolü yap
+const I18N = {
+  tr: {
+    test_title: "Test bildirimi",
+    test_message: "Bildirimler çalışıyor. Takip ettiğin bir yayıncı canlı yayına geçtiğinde böyle bir bildirim alacaksın.",
+    test_live_title: "canlı yayına geçti!",
+    test_channel_title: "için test bildirimi",
+    now_live: "Kick'te şu anda yayında!",
+    live_title: "canlı yayına geçti!"
+  },
+  en: {
+    test_title: "Test notification",
+    test_message: "Notifications are working. You will receive a notification like this when a streamer you follow goes live.",
+    test_live_title: "went live!",
+    test_channel_title: "test notification for",
+    now_live: "is live on Kick right now!",
+    live_title: "went live!"
+  },
+  de: {
+    test_title: "Testbenachrichtigung",
+    test_message: "Benachrichtigungen funktionieren. Sie erhalten eine solche Benachrichtigung, wenn ein verfolgter Streamer live geht.",
+    test_live_title: "ist jetzt live!",
+    test_channel_title: "Testbenachrichtigung für",
+    now_live: "ist gerade live auf Kick!",
+    live_title: "ist jetzt live!"
+  }
+};
+
 chrome.runtime.onInstalled.addListener(() => {
   setupAlarm();
   checkStreamsAndSetBadge();
@@ -107,18 +134,31 @@ async function checkStreamsAndSetBadge() {
 }
 
 // Profil fotoğrafını indirip bildirimde kullanılabilir data URL'e çevirir
+// (Service worker ortamına da uygun: FileReader yoksa btoa ile base64 üretilir)
 async function getAvatarDataUrl(url) {
   if (!url) return null;
   try {
     const response = await fetch(url);
     if (!response.ok) return null;
     const blob = await response.blob();
-    return await new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result);
-      reader.onerror = () => resolve(null);
-      reader.readAsDataURL(blob);
-    });
+
+    if (typeof FileReader !== "undefined") {
+      return await new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.onerror = () => resolve(null);
+        reader.readAsDataURL(blob);
+      });
+    }
+
+    const buffer = await blob.arrayBuffer();
+    const bytes = new Uint8Array(buffer);
+    let binary = "";
+    const chunkSize = 0x8000;
+    for (let i = 0; i < bytes.length; i += chunkSize) {
+      binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunkSize));
+    }
+    return `data:${blob.type || "image/png"};base64,${btoa(binary)}`;
   } catch (e) {
     console.error("Avatar alınamadı:", e);
     return null;
@@ -128,8 +168,10 @@ async function getAvatarDataUrl(url) {
 // Ayarlar ekranındaki test butonu için örnek bildirim gösterir
 async function sendTestNotification() {
   let iconUrl = "icon/icon.png";
-  let title = "Test bildirimi";
-  let message = "Bildirimler çalışıyor. Takip ettiğin bir yayıncı canlı yayına geçtiğinde böyle bir bildirim alacaksın.";
+  const lang = await chrome.storage.local.get(["lang"]).then((d) => d.lang || "tr");
+  const i18n = I18N[lang] || I18N.tr;
+  let title = i18n.test_title;
+  let message = i18n.test_message;
 
   try {
     const data = await chrome.storage.local.get(["channels"]);
@@ -147,8 +189,8 @@ async function sendTestNotification() {
           iconUrl = avatar;
         }
         title = result.livestream
-          ? `${displayName} canlı yayına geçti!`
-          : `${displayName} için test bildirimi`;
+          ? `${displayName} ${i18n.test_live_title}`
+          : `${displayName} ${i18n.test_channel_title}`;
         message = result.livestream?.session_title || message;
       }
     }
@@ -170,8 +212,10 @@ async function sendTestNotification() {
 
 // Kanal canlı yayına geçtiğinde sistem bildirimi gösterir
 async function notifyChannelLive(channel, result) {
+  const lang = await chrome.storage.local.get(["lang"]).then((d) => d.lang || "tr");
+  const i18n = I18N[lang] || I18N.tr;
   const displayName = result.user?.display_name || result.user?.username || channel;
-  const streamTitle = result.livestream?.session_title || "Kick'te şu anda yayında!";
+  const streamTitle = result.livestream?.session_title || `${channel} ${i18n.now_live}`;
 
   let iconUrl = "icon/icon.png";
   const avatar = await getAvatarDataUrl(result.user?.profile_pic);
@@ -183,7 +227,7 @@ async function notifyChannelLive(channel, result) {
     await chrome.notifications.create(`kick-live-${channel}-${Date.now()}`, {
       type: "basic",
       iconUrl: iconUrl,
-      title: `${displayName} canlı yayına geçti!`,
+      title: `${displayName} ${i18n.live_title}`,
       message: streamTitle
     });
   } catch (e) {

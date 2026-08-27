@@ -1,6 +1,6 @@
 const THEMES = {
   kick: {
-    label: "Kick Yeşili",
+    label: "theme_kick",
     swatch: ["#0e0e10", "#18181b", "#53fc18"],
     vars: {
       "--bg": "#0e0e10",
@@ -21,7 +21,7 @@ const THEMES = {
     }
   },
   okyanus: {
-    label: "Okyanus",
+    label: "theme_ocean",
     swatch: ["#0b1120", "#101a30", "#38bdf8"],
     vars: {
       "--bg": "#0b1120",
@@ -42,7 +42,7 @@ const THEMES = {
     }
   },
   mor: {
-    label: "Mor Gece",
+    label: "theme_purple",
     swatch: ["#120e1a", "#181225", "#9147ff"],
     vars: {
       "--bg": "#120e1a",
@@ -63,7 +63,7 @@ const THEMES = {
     }
   },
   gunbatimi: {
-    label: "Gün Batımı",
+    label: "theme_sunset",
     swatch: ["#171009", "#1d150c", "#ff9f2e"],
     vars: {
       "--bg": "#171009",
@@ -84,7 +84,7 @@ const THEMES = {
     }
   },
   kizil: {
-    label: "Kızıl Fırtına",
+    label: "theme_crimson",
     swatch: ["#130b0d", "#1a1013", "#ff4655"],
     vars: {
       "--bg": "#130b0d",
@@ -105,7 +105,7 @@ const THEMES = {
     }
   },
   buz: {
-    label: "Buz (Açık)",
+    label: "theme_ice",
     swatch: ["#f3f4f6", "#ffffff", "#22c55e"],
     vars: {
       "--bg": "#f3f4f6",

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Kick Yayın Bildirici",
-  "version": "1.4.1",
+  "version": "1.4.5",
   "description": "Seçtiğiniz Kick yayıncılarını anlık takip edin.",
   "permissions": [
     "storage",
@@ -11,6 +11,9 @@
   "host_permissions": [
     "https://*.kick.com/*"
   ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; img-src 'self' https: data: blob:;"
+  },
   "background": {
     "scripts": ["background.js"]
   },
@@ -20,6 +23,8 @@
     "default_icon": "icon/icon.png"
   },
   "icons": {
+    "16": "icon/icon.png",
+    "48": "icon/icon.png",
     "128": "icon/icon.png"
   },
   "browser_specific_settings": {
