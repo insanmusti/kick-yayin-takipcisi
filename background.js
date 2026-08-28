@@ -60,6 +60,23 @@ chrome.notifications.onClicked.addListener((notificationId) => {
   }
 });
 
+// Rozet (badge) API'leri Firefox for Android'de desteklenmediği için
+// güvenli çağrı için yardımcı fonksiyonlar
+function setLiveBadge(text) {
+  if (!chrome.action?.setBadgeText) return;
+  chrome.action.setBadgeText({ text });
+}
+
+function setLiveBadgeColor(color) {
+  if (!chrome.action?.setBadgeBackgroundColor) return;
+  chrome.action.setBadgeBackgroundColor({ color });
+}
+
+function setLiveBadgeTextColor(color) {
+  if (!chrome.action?.setBadgeTextColor) return;
+  chrome.action.setBadgeTextColor({ color });
+}
+
 // Yayın durumlarını paralel (hızlı) sorgulayan, rozeti güncelleyen ve bildirim gönderen ana fonksiyon
 async function checkStreamsAndSetBadge() {
   try {
@@ -69,7 +86,7 @@ async function checkStreamsAndSetBadge() {
     const notificationsEnabled = data.notificationsEnabled !== false;
 
     if (channels.length === 0) {
-      chrome.action.setBadgeText({ text: "" });
+      setLiveBadge("");
       return;
     }
 
@@ -114,11 +131,11 @@ async function checkStreamsAndSetBadge() {
 
     // Rozet metnini ve stilini güncelle
     if (liveCount > 0) {
-      chrome.action.setBadgeText({ text: liveCount.toString() });
-      chrome.action.setBadgeBackgroundColor({ color: "#53FC18" });
-      chrome.action.setBadgeTextColor({ color: "#000000" });
+      setLiveBadge(liveCount.toString());
+      setLiveBadgeColor("#53FC18");
+      setLiveBadgeTextColor("#000000");
     } else {
-      chrome.action.setBadgeText({ text: "" });
+      setLiveBadge("");
     }
   } catch (error) {
     console.error("Rozet güncelleme hatası:", error);
