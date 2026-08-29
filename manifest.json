@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Kick Yayın Bildirici",
-  "version": "1.4.5",
+  "version": "1.4.6",
   "description": "Seçtiğiniz Kick yayıncılarını anlık takip edin.",
   "permissions": [
     "storage",
@@ -35,7 +35,7 @@
       }
     },
     "gecko_android": {
-      "strict_min_version": "113.0"
+      "strict_min_version": "142.0"
     }
   }
 }
