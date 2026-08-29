@@ -11,6 +11,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   setupThemeGrid();
   setupSuggestionsToggle();
   setupNotificationsToggle();
+  setupNotifyHours();
   setupNotificationTest();
   setupSearch();
   loadChannels();
@@ -168,6 +169,34 @@ async function setupNotificationsToggle() {
   });
 }
 
+async function setupNotifyHours() {
+  const startSelect = document.getElementById("notify-start-hour");
+  const endSelect = document.getElementById("notify-end-hour");
+  if (!startSelect || !endSelect) return;
+
+  const populate = () => {
+    for (let h = 0; h < 24; h++) {
+      const opt = document.createElement("option");
+      opt.value = String(h);
+      opt.textContent = `${String(h).padStart(2, "0")}:00`;
+      startSelect.appendChild(opt);
+      endSelect.appendChild(opt.cloneNode(true));
+    }
+  };
+  populate();
+
+  const data = await chrome.storage.local.get(["notifyStartHour", "notifyEndHour"]);
+  startSelect.value = String(typeof data.notifyStartHour === "number" ? data.notifyStartHour : 0);
+  endSelect.value = String(typeof data.notifyEndHour === "number" ? data.notifyEndHour : 23);
+
+  startSelect.addEventListener("change", async () => {
+    await chrome.storage.local.set({ notifyStartHour: Number(startSelect.value) });
+  });
+  endSelect.addEventListener("change", async () => {
+    await chrome.storage.local.set({ notifyEndHour: Number(endSelect.value) });
+  });
+}
+
 function setupNotificationTest() {
   const btn = document.getElementById("test-notification-btn");
   if (!btn) return;
@@ -228,6 +257,12 @@ async function loadChannels() {
   });
 
   const results = await Promise.all(channelPromises);
+
+  results.sort((a, b) => {
+    const aLive = a.data && a.data.livestream !== null ? 1 : 0;
+    const bLive = b.data && b.data.livestream !== null ? 1 : 0;
+    return bLive - aLive;
+  });
 
   channelResults = results;
 
@@ -408,6 +443,9 @@ function renderChannelCard(container, item) {
   deleteBtn.addEventListener("click", () => removeChannel(item.name));
 
   if (item.error || !item.data) {
+    const topDiv = document.createElement("div");
+    topDiv.className = "channel-top";
+
     const infoDiv = document.createElement("div");
     infoDiv.className = "channel-info";
 
@@ -424,12 +462,17 @@ function renderChannelCard(container, item) {
     infoDiv.appendChild(nameSpan);
     infoDiv.appendChild(statusSpan);
 
-    card.appendChild(infoDiv);
-    card.appendChild(deleteBtn);
+    topDiv.appendChild(infoDiv);
+    topDiv.appendChild(deleteBtn);
+
+    card.appendChild(topDiv);
   } else {
     const isLive = item.data.livestream !== null;
     const viewers = isLive ? item.data.livestream.viewer_count : 0;
     const avatarUrl = item.data.user?.profile_pic || "../icon/icon.png";
+
+    const topDiv = document.createElement("div");
+    topDiv.className = "channel-top";
 
     const leftDiv = document.createElement("div");
     leftDiv.className = "channel-left";
@@ -460,8 +503,34 @@ function renderChannelCard(container, item) {
     leftDiv.appendChild(avatarImg);
     leftDiv.appendChild(detailsDiv);
 
-    card.appendChild(leftDiv);
-    card.appendChild(deleteBtn);
+    topDiv.appendChild(leftDiv);
+    topDiv.appendChild(deleteBtn);
+
+    card.appendChild(topDiv);
+
+    if (isLive) {
+      const streamDiv = document.createElement("div");
+      streamDiv.className = "stream-info";
+
+      const thumbUrl = item.data.livestream?.thumbnail;
+      if (thumbUrl) {
+        const thumbImg = document.createElement("img");
+        thumbImg.className = "stream-thumb";
+        thumbImg.src = thumbUrl;
+        thumbImg.alt = "";
+        thumbImg.addEventListener("error", () => {
+          thumbImg.remove();
+        });
+        streamDiv.appendChild(thumbImg);
+      }
+
+      const titleSpan = document.createElement("span");
+      titleSpan.className = "stream-title";
+      titleSpan.textContent = item.data.livestream?.session_title || item.name;
+      streamDiv.appendChild(titleSpan);
+
+      card.appendChild(streamDiv);
+    }
   }
 
   container.appendChild(card);

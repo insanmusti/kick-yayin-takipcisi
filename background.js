@@ -60,6 +60,15 @@ chrome.notifications.onClicked.addListener((notificationId) => {
   }
 });
 
+// Saat, bildirim penceresi içinde mi (gece yarısı geçişini destekler, örn. 22-6)
+function isInHourWindow(hour, startHour, endHour) {
+  if (startHour === endHour) return true; // kısıt yok
+  if (startHour < endHour) {
+    return hour >= startHour && hour <= endHour;
+  }
+  return hour >= startHour || hour <= endHour;
+}
+
 // Rozet (badge) API'leri Firefox for Android'de desteklenmediği için
 // güvenli çağrı için yardımcı fonksiyonlar
 function setLiveBadge(text) {
@@ -80,10 +89,15 @@ function setLiveBadgeTextColor(color) {
 // Yayın durumlarını paralel (hızlı) sorgulayan, rozeti güncelleyen ve bildirim gönderen ana fonksiyon
 async function checkStreamsAndSetBadge() {
   try {
-    const data = await chrome.storage.local.get(["channels", "liveStates", "notificationsEnabled"]);
+    const data = await chrome.storage.local.get(["channels", "liveStates", "notificationsEnabled", "notifyStartHour", "notifyEndHour"]);
     const channels = data.channels || [];
     const liveStates = data.liveStates || {};
     const notificationsEnabled = data.notificationsEnabled !== false;
+    const notifyStartHour = typeof data.notifyStartHour === "number" ? data.notifyStartHour : 0;
+    const notifyEndHour = typeof data.notifyEndHour === "number" ? data.notifyEndHour : 23;
+
+    const nowHour = new Date().getHours();
+    const inNotifyWindow = isInHourWindow(nowHour, notifyStartHour, notifyEndHour);
 
     if (channels.length === 0) {
       setLiveBadge("");
@@ -120,7 +134,7 @@ async function checkStreamsAndSetBadge() {
 
       // Durumlar kapalıyken de güncellenir ki anahtar tekrar açıldığında
       // birikmiş yanlış bildirimler patlamasın
-      if (item.isLive && liveStates[item.channel] === false && notificationsEnabled) {
+      if (item.isLive && liveStates[item.channel] === false && notificationsEnabled && inNotifyWindow) {
         await notifyChannelLive(item.channel, item.result);
       }
     }

@@ -207,12 +207,46 @@ h2 {
 /* Kart Yapısı */
 .channel-card {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: 8px;
   background-color: var(--card-bg);
   border: 1px solid var(--card-border);
   border-radius: 6px;
   padding: 8px 10px;
+}
+
+.channel-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+/* Canlı yayın bilgisi: küçük resim + başlık */
+.stream-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-top: 1px solid var(--card-border);
+  padding-top: 8px;
+  overflow: hidden;
+}
+
+.stream-thumb {
+  width: 64px;
+  height: 36px;
+  border-radius: 4px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background-color: var(--input-bg);
+}
+
+.stream-title {
+  font-size: 11px;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .channel-left {
@@ -353,6 +387,52 @@ h2 {
   font-size: 12px;
   font-weight: 600;
   color: var(--text);
+}
+
+/* Bildirim saat aralığı ayarı */
+.setting-row-hours {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.hours-label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hours-hint {
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.hours-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hour-select {
+  flex: 1;
+  background-color: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: 4px;
+  padding: 5px 8px;
+  color: var(--text);
+  font-size: 12px;
+  outline: none;
+  cursor: pointer;
+}
+
+.hour-select:focus {
+  border-color: var(--accent);
+}
+
+.hours-sep {
+  font-size: 11px;
+  color: var(--muted);
+  flex-shrink: 0;
 }
 
 .switch {
