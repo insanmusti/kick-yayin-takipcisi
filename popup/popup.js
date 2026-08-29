@@ -1,3 +1,6 @@
+let channelResults = [];
+let searchQuery = "";
+
 document.addEventListener("DOMContentLoaded", async () => {
   await restoreLang();
   await restoreTheme();
@@ -9,6 +12,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   setupSuggestionsToggle();
   setupNotificationsToggle();
   setupNotificationTest();
+  setupSearch();
   loadChannels();
   chrome.runtime.sendMessage({ action: "updateBadge" });
 
@@ -36,8 +40,47 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 });
 
-function setupTabs() {
-  const tabs = document.querySelectorAll(".tab-btn");
+function setupSearch() {
+  const searchInput = document.getElementById("search-input");
+  if (!searchInput) return;
+
+  searchInput.addEventListener("input", () => {
+    searchQuery = searchInput.value.trim().toLowerCase();
+    applySearchFilter();
+  });
+}
+
+function applySearchFilter() {
+  const container = document.getElementById("channel-list");
+  const noResults = document.getElementById("search-no-results");
+  if (!container) return;
+
+  const cards = container.querySelectorAll(".channel-card");
+  let visibleCount = 0;
+
+  cards.forEach((card) => {
+    const nameEl = card.querySelector(".channel-name");
+    const name = nameEl ? nameEl.textContent.toLowerCase() : "";
+    const match = !searchQuery || name.includes(searchQuery);
+    card.style.display = match ? "" : "none";
+    if (match) visibleCount++;
+  });
+
+  if (noResults) {
+    const hasQuery = searchQuery.length > 0;
+    const visible = visibleCount > 0;
+    noResults.classList.toggle("hidden", !hasQuery || visible);
+    if (hasQuery && !visible) {
+      getSavedLang().then((lang) => {
+        noResults.textContent = t("no_results", lang);
+      });
+    } else {
+      noResults.textContent = "";
+    }
+  }
+}
+
+function setupTabs() {  const tabs = document.querySelectorAll(".tab-btn");
   tabs.forEach((tab) => {
     tab.addEventListener("click", () => {
       tabs.forEach((t) => t.classList.toggle("active", t === tab));
@@ -159,10 +202,12 @@ async function loadChannels() {
   container.textContent = "";
 
   if (channels.length === 0) {
+    channelResults = [];
     const emptyDiv = document.createElement("div");
     emptyDiv.className = "empty-msg";
     emptyDiv.textContent = t("empty", lang);
     container.appendChild(emptyDiv);
+    applySearchFilter();
     renderSuggestions();
     return;
   }
@@ -184,11 +229,14 @@ async function loadChannels() {
 
   const results = await Promise.all(channelPromises);
 
+  channelResults = results;
+
   container.textContent = "";
   results.forEach((item) => {
     renderChannelCard(container, item);
   });
 
+  applySearchFilter();
   renderSuggestions();
 }
 

@@ -134,6 +134,46 @@ h2 {
   background-color: var(--accent-hover);
 }
 
+/* Arama Çubuğu */
+.search-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-group .search-icon {
+  position: absolute;
+  left: 10px;
+  width: 14px;
+  height: 14px;
+  fill: var(--muted);
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+#search-input {
+  flex: 1;
+  background-color: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: 4px;
+  padding: 6px 10px 6px 30px;
+  color: var(--text);
+  font-size: 13px;
+  outline: none;
+}
+
+#search-input:focus {
+  border-color: var(--accent);
+}
+
+#search-input:placeholder-shown + .search-icon {
+  opacity: 0.6;
+}
+
+#search-no-results.hidden {
+  display: none;
+}
+
 #channel-list {
   display: flex;
   flex-direction: column;

@@ -33,7 +33,19 @@
         <button id="add-channel-btn" data-i18n="add" type="button">Ekle</button>
       </div>
 
+      <div class="search-group">
+        <svg class="search-icon" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/></svg>
+        <input 
+          type="text" 
+          id="search-input" 
+          data-i18n-placeholder="search_placeholder"
+          placeholder="Takip ettiğin yayıncılarda ara..." 
+          autocomplete="off"
+        />
+      </div>
+
       <div id="channel-list"></div>
+      <div id="search-no-results" class="empty-msg hidden"></div>
 
       <div id="suggested-section" class="hidden">
         <div class="settings-section-title" data-i18n="suggested_channels">Önerilen Kanallar</div>
