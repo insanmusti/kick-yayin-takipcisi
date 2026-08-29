@@ -1,7 +1,6 @@
 # Kick Yayın Bildirici (Firefox)
 Artık direkt eklenti sayfasından indirebilirsiniz: 
-https://addons.mozilla.org/tr/firefox/addon/kick-yay%C4%B1n-bildirici/
-
+https://addons.mozilla.org/en-US/firefox/addon/kick-live-stream-notifier/
 Kick platformundaki favori yayıncılarınızın canlı yayın durumlarını anlık olarak takip etmenizi sağlayan Firefox tarayıcı eklentisi.
 
 ## Özellikler
