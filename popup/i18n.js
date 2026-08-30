@@ -39,7 +39,10 @@ const I18N = {
     theme_purple: "Mor Gece",
     theme_sunset: "Gün Batımı",
     theme_crimson: "Kızıl Fırtına",
-    theme_ice: "Buz (Açık)"
+    theme_ice: "Buz (Açık)",
+    about: "Hakkında",
+    site_link: "Eklentinin web sitesi",
+    site_link_title: "Eklentinin web sitesini ziyaret et"
   },
   en: {
     title: "Kick Stream Notifier",
@@ -81,7 +84,10 @@ const I18N = {
     theme_purple: "Purple Night",
     theme_sunset: "Sunset",
     theme_crimson: "Crimson Storm",
-    theme_ice: "Ice (Light)"
+    theme_ice: "Ice (Light)",
+    about: "About",
+    site_link: "Extension website",
+    site_link_title: "Visit the extension website"
   }
 };
 
