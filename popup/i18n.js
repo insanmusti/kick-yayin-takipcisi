@@ -42,7 +42,17 @@ const I18N = {
     theme_ice: "Buz (Açık)",
     about: "Hakkında",
     site_link: "Eklentinin web sitesi",
-    site_link_title: "Eklentinin web sitesini ziyaret et"
+    site_link_title: "Eklentinin web sitesini ziyaret et",
+    backup: "Yedekleme",
+    export_list: "Listeyi Dışa Aktar",
+    import_list: "Listeyi İçe Aktar",
+    import_success: "Kanal listesi içe aktarıldı!",
+    import_error: "Geçersiz dosya. Lütfen dışa aktarılan bir yedek dosyası seçin.",
+    export_success: "Kanal listesi dışa aktarıldı!",
+    export_error: "Dışa aktarma başarısız oldu.",
+    pin: "Sabitle",
+    unpin: "Sabitlemeyi kaldır",
+    pinned: "Sabitlendi"
   },
   en: {
     title: "Kick Stream Notifier",
@@ -87,7 +97,17 @@ const I18N = {
     theme_ice: "Ice (Light)",
     about: "About",
     site_link: "Extension website",
-    site_link_title: "Visit the extension website"
+    site_link_title: "Visit the extension website",
+    backup: "Backup",
+    export_list: "Export List",
+    import_list: "Import List",
+    import_success: "Channel list imported!",
+    import_error: "Invalid file. Please select an exported backup file.",
+    export_success: "Channel list exported!",
+    export_error: "Failed to export.",
+    pin: "Pin",
+    unpin: "Unpin",
+    pinned: "Pinned"
   }
 };
 

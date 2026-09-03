@@ -84,6 +84,14 @@
 
       <button id="test-notification-btn" class="test-btn" data-i18n="test_notification" type="button">Test Bildirimi Gönder</button>
 
+      <div class="settings-section-title" data-i18n="backup">Yedekleme</div>
+      <div class="backup-actions">
+        <button id="export-btn" class="backup-btn" data-i18n="export_list" type="button">Listeyi Dışa Aktar</button>
+        <button id="import-btn" class="backup-btn" data-i18n="import_list" type="button">Listeyi İçe Aktar</button>
+        <input type="file" id="import-file" accept=".json,application/json" hidden />
+      </div>
+      <div id="backup-message" class="backup-msg hidden"></div>
+
       <div class="settings-section-title" data-i18n="language">Dil</div>
       <div class="lang-grid">
         <button type="button" class="lang-btn selected" data-lang="tr">🇹🇷 Türkçe</button>

@@ -20,13 +20,29 @@ const I18N = {
 
 chrome.runtime.onInstalled.addListener(() => {
   setupAlarm();
+  restoreAlarmGuarantee();
   checkStreamsAndSetBadge();
 });
 
 chrome.runtime.onStartup.addListener(() => {
   setupAlarm();
+  restoreAlarmGuarantee();
   checkStreamsAndSetBadge();
 });
+
+// Service worker her uyandığında alarmın hala kurulu olduğundan emin ol
+function restoreAlarmGuarantee() {
+  try {
+    chrome.alarms.get("checkLiveStreams", (alarm) => {
+      if (!alarm) {
+        setupAlarm();
+      }
+    });
+  } catch (e) {
+    console.error("Alarm garantisi kurulamadı:", e);
+    setupAlarm();
+  }
+}
 
 // Periyodik kontrol için 1 dakikalık alarm oluştur
 function setupAlarm() {
@@ -87,6 +103,31 @@ function setLiveBadgeTextColor(color) {
 }
 
 // Yayın durumlarını paralel (hızlı) sorgulayan, rozeti güncelleyen ve bildirim gönderen ana fonksiyon
+const MAX_RETRIES = 2;
+const RETRY_DELAY_MS = 1000;
+const REQUEST_TIMEOUT_MS = 10000;
+
+// Kick API için yeniden denemeli fetch sarmalayıcı
+async function fetchWithRetry(url, attempt = 1) {
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+    const response = await fetch(url, {
+      cache: "no-store",
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+    return response;
+  } catch (e) {
+    if (attempt < MAX_RETRIES) {
+      console.warn(`${url} isteği başarısız (deneme ${attempt}/${MAX_RETRIES}), tekrar deneniyor:`, e);
+      await new Promise((r) => setTimeout(r, RETRY_DELAY_MS * attempt));
+      return fetchWithRetry(url, attempt + 1);
+    }
+    throw e;
+  }
+}
+
 async function checkStreamsAndSetBadge() {
   try {
     const data = await chrome.storage.local.get(["channels", "liveStates", "notificationsEnabled", "notifyStartHour", "notifyEndHour"]);
@@ -107,9 +148,7 @@ async function checkStreamsAndSetBadge() {
     // İstekleri tek tek beklemek yerine Promise.all ile paralel atıyoruz (Hız artışı sağlar)
     const requests = channels.map(async (channel) => {
       try {
-        const response = await fetch(`https://kick.com/api/v1/channels/${channel}`, {
-          cache: "no-store"
-        });
+        const response = await fetchWithRetry(`https://kick.com/api/v1/channels/${channel}`);
         if (response.ok) {
           const result = await response.json();
           return { channel, ok: true, isLive: result.livestream !== null, result };
@@ -121,6 +160,13 @@ async function checkStreamsAndSetBadge() {
     });
 
     const results = await Promise.all(requests);
+
+    const failureCount = results.filter((r) => !r.ok).length;
+    const update = { lastCheckTime: Date.now(), lastApiErrorCount: failureCount };
+    if (failureCount > 0) {
+      update.lastApiErrorTimestamp = Date.now();
+    }
+    await chrome.storage.local.set(update);
 
     const newLiveStates = {};
     for (const item of results) {
@@ -161,7 +207,7 @@ async function checkStreamsAndSetBadge() {
 async function getAvatarDataUrl(url) {
   if (!url) return null;
   try {
-    const response = await fetch(url);
+    const response = await fetch(url, { cache: "no-store" });
     if (!response.ok) return null;
     const blob = await response.blob();
 
@@ -201,9 +247,7 @@ async function sendTestNotification() {
     const channels = data.channels || [];
 
     if (channels.length > 0) {
-      const response = await fetch(`https://kick.com/api/v1/channels/${channels[0]}`, {
-        cache: "no-store"
-      });
+      const response = await fetchWithRetry(`https://kick.com/api/v1/channels/${channels[0]}`);
       if (response.ok) {
         const result = await response.json();
         const displayName = result.user?.display_name || result.user?.username || channels[0];

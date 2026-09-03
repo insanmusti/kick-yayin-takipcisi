@@ -14,6 +14,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   setupNotifyHours();
   setupNotificationTest();
   setupSearch();
+  setupBackup();
   loadChannels();
   chrome.runtime.sendMessage({ action: "updateBadge" });
 
@@ -224,8 +225,9 @@ async function loadChannels() {
   const container = document.getElementById("channel-list");
   if (!container) return;
 
-  const data = await chrome.storage.local.get(["channels"]);
+  const data = await chrome.storage.local.get(["channels", "pinnedChannels"]);
   const channels = data.channels || [];
+  const pinnedChannels = data.pinnedChannels || [];
   const lang = await getSavedLang();
 
   container.textContent = "";
@@ -259,9 +261,11 @@ async function loadChannels() {
   const results = await Promise.all(channelPromises);
 
   results.sort((a, b) => {
+    const aPinned = pinnedChannels.includes(a.name) ? 2 : 0;
+    const bPinned = pinnedChannels.includes(b.name) ? 2 : 0;
     const aLive = a.data && a.data.livestream !== null ? 1 : 0;
     const bLive = b.data && b.data.livestream !== null ? 1 : 0;
-    return bLive - aLive;
+    return (bPinned + bLive) - (aPinned + aLive);
   });
 
   channelResults = results;
@@ -422,11 +426,13 @@ async function addChannel(channelName) {
 }
 
 async function removeChannel(channelName) {
-  const data = await chrome.storage.local.get(["channels"]);
+  const data = await chrome.storage.local.get(["channels", "pinnedChannels"]);
   let channels = data.channels || [];
+  let pinnedChannels = data.pinnedChannels || [];
 
   channels = channels.filter((name) => name !== channelName);
-  await chrome.storage.local.set({ channels: channels });
+  pinnedChannels = pinnedChannels.filter((name) => name !== channelName);
+  await chrome.storage.local.set({ channels: channels, pinnedChannels: pinnedChannels });
   await loadChannels();
   chrome.runtime.sendMessage({ action: "updateBadge" });
 }
@@ -435,12 +441,50 @@ function renderChannelCard(container, item) {
   const card = document.createElement("div");
   card.className = "channel-card";
 
+  const actionsDiv = document.createElement("div");
+  actionsDiv.className = "channel-actions";
+
+  const pinBtn = document.createElement("button");
+  pinBtn.className = "pin-btn";
+  pinBtn.type = "button";
+  pinBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M16 9V4h1c.55 0 1-.45 1-1s-.45-1-1-1H7c-.55 0-1 .45-1 1s.45 1 1 1h1v5c0 1.66-1.34 3-3 3v2h5.97v7l1 1 1-1v-7H19v-2c-1.66 0-3-1.34-3-3z"/></svg>';
+
+  chrome.storage.local.get(["pinnedChannels"]).then((pData) => {
+    const pinned = (pData.pinnedChannels || []).includes(item.name);
+    pinBtn.classList.toggle("pinned", pinned);
+    card.classList.toggle("pinned", pinned);
+    getSavedLang().then((lang) => {
+      pinBtn.title = t(pinned ? "unpin" : "pin", lang);
+    });
+  });
+
   const deleteBtn = document.createElement("button");
   deleteBtn.className = "delete-btn";
   getSavedLang().then((lang) => {
     deleteBtn.textContent = t("delete", lang);
   });
   deleteBtn.addEventListener("click", () => removeChannel(item.name));
+
+  actionsDiv.appendChild(pinBtn);
+  actionsDiv.appendChild(deleteBtn);
+
+  pinBtn.addEventListener("click", async () => {
+    const pData = await chrome.storage.local.get(["pinnedChannels"]);
+    let pinnedList = pData.pinnedChannels || [];
+    const isPinned = pinnedList.includes(item.name);
+    if (isPinned) {
+      pinnedList = pinnedList.filter((n) => n !== item.name);
+    } else {
+      pinnedList.push(item.name);
+    }
+    await chrome.storage.local.set({ pinnedChannels: pinnedList });
+    pinBtn.classList.toggle("pinned", !isPinned);
+    card.classList.toggle("pinned", !isPinned);
+    getSavedLang().then((lang) => {
+      pinBtn.title = t(isPinned ? "pin" : "unpin", lang);
+    });
+    await loadChannels();
+  });
 
   if (item.error || !item.data) {
     const topDiv = document.createElement("div");
@@ -463,7 +507,7 @@ function renderChannelCard(container, item) {
     infoDiv.appendChild(statusSpan);
 
     topDiv.appendChild(infoDiv);
-    topDiv.appendChild(deleteBtn);
+    topDiv.appendChild(actionsDiv);
 
     card.appendChild(topDiv);
   } else {
@@ -504,7 +548,7 @@ function renderChannelCard(container, item) {
     leftDiv.appendChild(detailsDiv);
 
     topDiv.appendChild(leftDiv);
-    topDiv.appendChild(deleteBtn);
+    topDiv.appendChild(actionsDiv);
 
     card.appendChild(topDiv);
 
@@ -534,4 +578,70 @@ function renderChannelCard(container, item) {
   }
 
   container.appendChild(card);
+}
+
+function setupBackup() {
+  const exportBtn = document.getElementById("export-btn");
+  const importBtn = document.getElementById("import-btn");
+  const importFile = document.getElementById("import-file");
+  const messageEl = document.getElementById("backup-message");
+  if (!exportBtn || !importBtn || !importFile || !messageEl) return;
+
+  const showMessage = (text, isError) => {
+    messageEl.textContent = text;
+    messageEl.classList.remove("hidden", "success", "error");
+    messageEl.classList.add(isError ? "error" : "success");
+    setTimeout(() => messageEl.classList.add("hidden"), 3000);
+  };
+
+  exportBtn.addEventListener("click", async () => {
+    try {
+      const data = await chrome.storage.local.get(["channels"]);
+      const channels = data.channels || [];
+      const blob = new Blob([JSON.stringify(channels, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `kick-kanallar-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      const lang = await getSavedLang();
+      showMessage(t("export_success", lang), false);
+    } catch (e) {
+      console.error("Dışa aktarma hatası:", e);
+      const lang = await getSavedLang();
+      showMessage(t("export_error", lang), true);
+    }
+  });
+
+  importBtn.addEventListener("click", () => {
+    importFile.click();
+  });
+
+  importFile.addEventListener("change", async (e) => {
+    const file = e.target.files[0];
+    const lang = await getSavedLang();
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const parsed = JSON.parse(text);
+      if (!Array.isArray(parsed)) throw new Error("invalid");
+      const channels = parsed
+        .filter((c) => typeof c === "string")
+        .map((c) => c.trim().toLowerCase().replace(/^@/, ""))
+        .filter((c) => c.length > 0);
+      const deduped = [...new Set(channels)];
+      const pinData = await chrome.storage.local.get(["pinnedChannels"]);
+      const keptPins = (pinData.pinnedChannels || []).filter((p) => deduped.includes(p));
+      await chrome.storage.local.set({ channels: deduped, pinnedChannels: keptPins });
+      showMessage(t("import_success", lang), false);
+      await loadChannels();
+      chrome.runtime.sendMessage({ action: "updateBadge" });
+    } catch (err) {
+      console.error("İçe aktarma hatası:", err);
+      showMessage(t("import_error", lang), true);
+    } finally {
+      importFile.value = "";
+    }
+  });
 }

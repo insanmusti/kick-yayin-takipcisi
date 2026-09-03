@@ -605,6 +605,91 @@ h2 {
   font-size: 11px;
 }
 
+/* Yedekleme bölümü */
+.backup-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.backup-btn {
+  flex: 1;
+  background-color: var(--card-bg);
+  color: var(--text);
+  border: 1px solid var(--input-border);
+  border-radius: 4px;
+  padding: 7px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.backup-btn:hover {
+  border-color: var(--accent);
+  background-color: var(--tab-active-bg);
+}
+
+.backup-msg {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 0;
+}
+
+.backup-msg.success {
+  color: var(--accent);
+}
+
+.backup-msg.error {
+  color: var(--danger);
+}
+
+.backup-msg.hidden {
+  display: none;
+}
+
+/* Sabitleme butonu */
+.pin-btn {
+  background-color: transparent;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 3px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.pin-btn:hover {
+  color: var(--text);
+  background-color: rgba(127, 127, 127, 0.15);
+}
+
+.pin-btn.pinned {
+  color: var(--accent);
+}
+
+.pin-btn svg {
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
+}
+
+.channel-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.channel-card.pinned {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
 .site-link {
   display: flex;
   align-items: center;
